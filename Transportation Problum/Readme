@@ -1,0 +1,14 @@
+Here is the Hello World program for Transportation Problum.
+
+Usage of code:
+python TransportationProblum.py NWC Dataset.csv
+python TransportationProblum.py LCC Dataset.csv
+python TransportationProblum.py VAM Dataset.csv
+
+Dataset.csv fileformat is shown in Dataset.csv file
+
+Here NWC represents Northwest Corner Cell
+Here LCC represents Least Cost Cell
+Here VAM represents Vogel's Approximation Method
+
+TransportationProblum.py file takes Dataset.csv file and output the corresponding Occupied Matrix and Total Cost.
