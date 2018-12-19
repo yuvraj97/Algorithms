@@ -251,6 +251,10 @@ def main():
         print("Usage: ",sys.argv[0],"  argument(NWC/LCC/VAM)    Dataset.csv");
         exit(0)
     supply, demand, cost = read(sys.argv[2])
+    if(supply.sum() != demand.sum()):
+        print("Currently this program is for balanced Transportation Problum")
+        print("This program does not support Unbalanced Transportation Problum")
+        exit(0)
     if(sys.argv[1].lower()=="nwc"):
         output,total_cost = NorthwestCornerCell(supply,demand,cost)
         print("Occupied matrix of NorthwestCornerCell:")
