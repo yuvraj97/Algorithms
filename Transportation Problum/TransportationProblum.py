@@ -6,12 +6,6 @@ Updated on Wed Dec 19 15:09:55 2018
 @author: Yuvraj
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec 18 18:29:09 2018
-
-@author: Vaio
-"""
 import numpy as np
 import sys
 
