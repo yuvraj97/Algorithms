@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Dec 18 18:29:09 2018
-Updated on Wed Dec 19 15:09:55 2018
-
 @author: Yuvraj
+
+Updation: added properties of VAM
+Updated on Wed Dec 19 15:09:55 2018
 """
 
 import numpy as np
@@ -239,33 +240,44 @@ def printMatrix(matrix):
         for j in range(len(matrix[i])):
             print(matrix[i][j],end="\t")
         print()
-    
+
 def main():
     if len(sys.argv) != 3:
         print("Usage: ",sys.argv[0],"  argument(NWC/LCC/VAM)    Dataset.csv");
         exit(0)
     supply, demand, cost = read(sys.argv[2])
-    if(supply.sum() != demand.sum()):
-        print("Currently this program is for balanced Transportation Problum")
-        print("This program does not support Unbalanced Transportation Problum")
-        exit(0)
+    total_supply = supply.sum()
+    total_demand = demand.sum()
+    extra = total_supply - total_demand
+    if(total_supply > total_demand):
+        row = cost.shape[0]
+        temp = np.zeros((row,1))
+        cost = np.append(cost,temp,axis=1)
+        demand = np.append(demand, extra)
+        print("Supply > Demand So a dummy column is added in last")
+    elif(total_supply < total_demand):
+        col = cost.shape[1]
+        temp = np.zeros(col)
+        cost = np.vstack([cost,temp])
+        supply = np.append(supply, -extra)
+        print("Demand > Supply So a dummy row is added in last")
+    #printMatrix(cost)
+    method = ""
     if(sys.argv[1].lower()=="nwc"):
         output,total_cost = NorthwestCornerCell(supply,demand,cost)
-        print("Occupied matrix of NorthwestCornerCell:")
-        printMatrix(output)
-        print("Total cost of NorthwestCornerCell:", total_cost)
+        method = "NorthwestCornerCell"
     elif(sys.argv[1].lower()=="lcc"):
         output,total_cost = LeastCostCell(supply,demand,cost)
-        print("Occupied matrix of LeastCostCell:")
-        printMatrix(output)
-        print("Total cost of LeastCostCell:", total_cost)
+        method = "LeastCostCell"
     elif(sys.argv[1]=="vam"):
         output,total_cost = VogalsApproximation(supply,demand,cost)
-        print("Occupied matrix of VogalsApproximation:")
-        printMatrix(output)
-        print("Total cost of VogalsApproximation:", total_cost)
+        method = "VogalsApproximation"
     else:
         print("Invalid Input");
-        
+        exit(0)
+    print("Occupied matrix of ",method,":")
+    printMatrix(output)
+    print("Total cost of ",method,":", total_cost)
+
 if __name__ == "__main__":
     main()
