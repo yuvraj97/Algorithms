@@ -1,11 +1,23 @@
-Here is the Hello World program for Transportation Problum.
+Here is a program for Transportation Problum.
+
+Usage of arguments should be precise like:
+2nd argument must be NWC/LCC/VAM
+3rd argument must be filename
 
 Usage of code:
 python TransportationProblum.py NWC Dataset.csv
 python TransportationProblum.py LCC Dataset.csv
 python TransportationProblum.py VAM Dataset.csv
 
-Dataset.csv fileformat is shown in Dataset.csv file
+And if you want Output of Occupied Matrix then use -V in last like:
+
+python TransportationProblum.py NWC Dataset.csv -V
+python TransportationProblum.py LCC Dataset.csv -V
+python TransportationProblum.py VAM Dataset.csv -V
+
+It will generate a Output.csv file that will contain Occupied Matrix.
+
+Dataset.csv fileformat is shown in Dataset directory
 
 Here NWC represents Northwest Corner Cell
 Here LCC represents Least Cost Cell
