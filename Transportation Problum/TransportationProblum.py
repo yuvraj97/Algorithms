@@ -414,11 +414,20 @@ def checkAnswer(supply, demand, output):
             return False
     return True
             
-        
+def writeOutput(output):
+    f = open("Output.csv","w")
+    for i in range(output.shape[0]):
+        for j in range(output.shape[1]):
+            f.write(str(output[i,j])+",")
+        f.write("\n")
+    f.close()
         
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: ",sys.argv[0],"  argument(NWC/LCC/VAM)    Dataset.csv");
+    if( not(len(sys.argv) == 3 or len(sys.argv) == 4)):
+        print("Usage:",sys.argv[0]," argument(NWC/LCC/VAM) Dataset.csv");
+        print("OR")
+        print("Usage: ",sys.argv[0]," argument(NWC/LCC/VAM) Dataset.csv -v");
+        print("-v is for verbose it will create a Output.csv file in current location containing Occupied matrix")
         exit(0)
     supply, demand, cost = read(sys.argv[2])
     cost = cost.astype(float)
@@ -451,8 +460,13 @@ def main():
     else:
         print("Invalid Input");
         exit(0)
-    print("Occupied matrix of ",method,":")
-    printMatrix(output)
+    if(len(sys.argv) == 4):
+        if(sys.argv[3].lower() == "-v"):
+            writeOutput(output)
+            print("Occupied matrix is written in Output.csv file at current location")
+        else:
+            print("Invalid Input");
+            exit(0)
     print("Total cost of ",method,":", total_cost)
     print("Checking Validity of answer")
     validity = checkAnswer(supply,demand,output)
