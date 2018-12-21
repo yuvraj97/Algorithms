@@ -454,7 +454,7 @@ def main():
     elif(sys.argv[1].lower()=="lcc"):
         output,total_cost = LeastCostCell(supply,demand,cost)
         method = "LeastCostCell"
-    elif(sys.argv[1]=="vam"):
+    elif(sys.argv[1].lower()=="vam"):
         output,total_cost = VogalsApproximationV2(supply,demand,cost)
         method = "VogalsApproximation"
     else:
