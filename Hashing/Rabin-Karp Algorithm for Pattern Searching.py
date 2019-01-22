@@ -24,11 +24,6 @@ class RollingHash():
     def skip(self,old):
         self.magic = (self.magic * (self.ibase % self.p)) % self.p
         self.hash = (self.hash - old*self.magic + self.p*self.base) % self.p
-    def hashString(self,txt):
-        h = 0
-        for i in txt:
-            h = h*self.base + ord(i)
-        return h % self.p
     
 # It will give us the most optimal base
 # it will search for the largest value associated with each charater in the txt
