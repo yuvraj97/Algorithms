@@ -3,7 +3,7 @@
 Created on Tue Jan 22 04:09:30 2019
 @author: Yuvraj
 Inspired by MIT 6.006: Introduction to Algorithms - MIT OpenCourseWare
-This is a program to find a string in a given string
+This is a program to find a string in a given string using Karp Rabin Algorithm
 Using:
 Rolling Hashes
 Rabin-Karp Algorithm for Pattern Searching
