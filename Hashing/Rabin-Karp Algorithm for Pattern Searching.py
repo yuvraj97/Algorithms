@@ -8,8 +8,8 @@ Using:
 Rolling Hashes
 Rabin-Karp Algorithm for Pattern Searching
 """
-from gcd import modInverse
-
+from lib.gcd import modInverse
+from lib.GenerateRandomPrime import generatePrimeNumber
 class RollingHash():
     def __init__(self,base,p):
         self.p = p                # p: prime number
@@ -34,30 +34,13 @@ def getBaseByString(txt):
             base = ord(i)
     return base +1
 
-# How to get optimal prime
-# We get the optimal base(b) by getBaseByString()
-# And say the no of character in pattern is: size
-# So our prime should be near a number say (number)
-# This function is not implemented yet in this program
-def primeShouldBeNear(base,size):
-    number =1
-    for i in range(size):
-        number *= base
-    return number # Now next step is to find prime near (number)
-
-# This function is pending
-# It will be used so that the user dont have to provide the prime number
-# The program will automatically generate one (efficiently and optimal)
-def primeNoGenerator():
-    pass
-
-def find(txt,pattern,prime):
+def find(txt,pattern):
     base = getBaseByString(txt)
     #print("Base:",base)
     size = len(pattern)
+    prime = generatePrimeNumber()
     rtxt=RollingHash(base,prime)
     rpat=RollingHash(base,prime)
-    
     # Get hash of the pattern
     for i in range(size):
         rpat.append(ord(pattern[i]))
@@ -79,10 +62,15 @@ def find(txt,pattern,prime):
                 return i - size +1
     return -1
 
-'''
+"""
 # EXAMPLE
 txt = "1[]2A{'}\tnB\0CE~ti4:?9,<4$!7e>)hg*f#78%#@hj@G!HU&*"
 pattern = "hj@G!HU"
-prime = 503
-print(find(txt,pattern,prime))
-'''
+print(find(txt,pattern))
+"""
+"""
+f=open("test.txt",'r')
+txt = f.read()
+pattern = "search"
+print(find(txt,pattern))
+"""
