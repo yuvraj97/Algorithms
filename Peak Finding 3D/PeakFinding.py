@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Nov 30 17:58:23 2018
-@author: Vaio
+@author: Yuvraj
 """
 import sys;
 from random import randint;
