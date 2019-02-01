@@ -5,8 +5,6 @@ Created on Thu Jan 31 06:44:56 2019
 @author: Yuvraj
 """
 # This is program for Karatsuba Algorithm
-# This is a more generalized in term of base
-# This program will multiply any two n digits number with any base using Karatsuba Algorithm
 
 # noOfDigits() will return number of digits in a number: n with base: base
 # Ex:
