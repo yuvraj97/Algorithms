@@ -67,8 +67,6 @@ def max(a,b):
 def karatsubaMultiplication(x,y,base=10):
     if(x.bit_length() <= 64 and y.bit_length() <=64):
         return x*y
-#    if(x<base and  y < base):
-#        return x*y
     # x_digits is the no of digits in x and y_digits is the no of digits in y
     x_digits, y_digits = noOfDigits(x,base), noOfDigits(y,base)       # O(N), O(N)
     exp = max(x_digits,y_digits)//2
