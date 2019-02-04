@@ -1,0 +1,10 @@
+These results get from  100  test cases:
+With loadFactor of 0.5
+each test case: insert  1,000,000 elements
+And search for each and every element
+And randomly deleting nodes
+According to the test, OpenAddressing on average Took : 1.4588115485070028  probes
+In our: 100  *  1000000  Inserts maximum probe taken is: 23
+Average Time spend per delete: 1.2415326505912441e-05  seconds
+Average Time spend per insert  4.041350326538086e-05  seconds
+Average Time spend per lookup : 7.476306738853455e-06 seconds
