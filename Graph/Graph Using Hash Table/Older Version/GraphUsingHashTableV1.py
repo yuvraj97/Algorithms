@@ -5,19 +5,17 @@ Created on Sun Feb  3 05:00:16 2019
 @author: Yuvraj
 """
 
-# Main diffrence in this and previous version is that I replaced LinkedList with HashTable
-# And also implemented some more methods like for: BFS, DFS, Cycle Detection
-
 # Here we uses Hash Table to implement Adjacency List
 # vertices works as key (indexof hashTable) and the neighbours as there values
 # each neighbour has its own value initially it's None but we can use it in numerous ways
 # like when solving for travelling salesman value of each neighbour represents
 # cost from the key to it's value. Mean cost associated  from one node to the another
 
-# to use OpenAddressing Hash Table just uncomment line number 19 and comment line number 20
-# to use Chaining Hash Table just uncomment line number 20 and comment line number 19
+# to use OpenAddressing Hash Table just uncomment line number 16 and comment line number 17
+# to use Chaining Hash Table just uncomment line number 17 and comment line number 16
 import lib.OpenAddressing as ht
 #import lib.HashTable as ht
+import lib.LinkedList as ll
 import lib.load
 
 # Arguments in AdjacencyList
@@ -54,7 +52,11 @@ class AdjacencyList():
     # here a: AdjacencyList object, and let say e wanna find neighbours of a vertex say V
     # It will return a itterator that will give you neighbours associated with given vertex
     def __getitem__(self,vertex):
-        return self.__neighbourVert__(vertex)
+        vertex = self.dtype(vertex)
+        llist = self._hashTable_[vertex]    # self._hashTable_[vertex] will give us a itterator of LinkedList
+        if(llist == None): return
+        for node in llist:   
+            yield node
 
 # =============================================================================
     
@@ -83,29 +85,12 @@ class AdjacencyList():
     #    for list_of_vertex_with_its_neig in a:
     #        operation_wanna_performe_on_that_list(list_of_vertex_with_its_neig)
     def __iter__(self):
-        for key_Vertex, value in self._hashTable_:   # here we ittertively get key, value pair of our hashTable; key is the vertex and the value is LinkedList of neighbours
+        for key_Vertex, value_LinkedList in self._hashTable_:   # here we ittertively get key, value pair of our hashTable; key is the vertex and the value is LinkedList of neighbours
             y = [key_Vertex,[]]                                 # In y we store a vertex as it's 1st element and list of the neighbours of that vertex as 2nd element
-            for key, val in value:                   # Here now LinkedList will ittertively get it's nodes key, value pair
+            for key, val in value_LinkedList:                   # Here now LinkedList will ittertively get it's nodes key, value pair
                 y[1].append(key)                                # we has stored neighbours as key
             yield y
 
-# =============================================================================
-
-    def vertices(self):
-        for vert,edge in self:
-            yield vert
-
-    def edges(self):
-        for vertex,neig in self._hashTable_:
-            for k,v in neig:
-                yield (vertex,k)
-    
-    def getVertices(self):
-        return [ v for v in self.vertices() ]
-
-    def getEdges(self):
-        return [e for e in self.edges()]
-    
 # =============================================================================
 
     # Usage: a.initializeVertices(vertices_list)
@@ -135,68 +120,51 @@ class AdjacencyList():
         vertex = self.dtype(vertex)
         if(self._hashTable_[vertex] == None):
             self.noVertices += 1
-        self._hashTable_[vertex] = ht.HashTable()
+        self._hashTable_[vertex] = ll.LinkedList()
 
 # =============================================================================
-
-    def __edgeCondition__(self,edge):
-        if(type(edge) != tuple): raise ValueError('Argument must be tuple')
-        if(len(edge) == 0): raise ValueError('Length of tuple must not be 0')
-        startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
-        if startVertex not in self._hashTable_: raise ValueError(startVertex,' is not a Vertex')
-        if endVertex not in self._hashTable_: raise ValueError(endVertex,' is not a Vertex')
-        
+    
     # edge must be a tuple of size either 2(startVertex, endVertex) or 3(startVertex, endVertex, value)
     def addNewEdge(self,edge):
-        self.__edgeCondition__(edge)
+        if(type(edge) != tuple or len(edge) == 0):
+            return
         startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
-        if(self._hashTable_[startVertex][endVertex] != None): return
         if(len(edge)==3):
             value = edge[2]
         else:
             value = None
-        table = self._hashTable_[startVertex]  # # llist specifies LinkedList object
-        if(table == None): return
-        if(table[endVertex] != None): return
+        llist = self._hashTable_[startVertex]  # # llist specifies LinkedList object
+        if(llist == None): return
+        if(llist.find(endVertex) != None): return
         self.noEdges += 1
-        table[endVertex] = value
+        #print("Adding edge:",startVertex,endVertex)
+        llist.add(endVertex,value)
         if(self.isUndirectedGraph):
-            table = self._hashTable_[endVertex]
-            if(table == None): return
-            if(table[startVertex] != None): return
-            table[startVertex] = value
-
-    def getValueOf(self,edge):
-        self.__edgeCondition__(edge)
-        startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
-        return self._hashTable_[startVertex][endVertex]
-    
+            llist = self._hashTable_[endVertex]
+            if(llist == None): return
+            if(llist.find(startVertex) != None): return
+            llist.add(startVertex,value)
+            #print("Adding edge:",endVertex,startVertex)
+            
 # =============================================================================
     
     # vertex can be int or string
-    def __neighbourNode__(self,vertex):
+    def neighbour(self,vertex):
         vertex = self.dtype(vertex)
-        table = self._hashTable_[vertex]    # self._hashTable_[vertex] will give us a itterator of LinkedList
-        if(table == None): return
-        for node in table:   
+        llist = self._hashTable_[vertex]    # self._hashTable_[vertex] will give us a itterator of LinkedList
+        if(llist == None): return
+        for node in llist:   
             yield node
-    
-    def __neighbourVert__(self,vertex):
-        for k, v in self.__neighbourNode__(vertex):
-            yield k
 
-    def getNeighbour(self,vertex):
-        return [n for n in self[vertex]]
-    
 # =============================================================================
     
     # vertex can be int or string
     def deleteVertex(self,vertex):
         vertex = self.dtype(vertex)
         # Here we visit all of its neighbour and remove vertex from there neighbour
-        for neig_key in self[vertex]:
-            table = self._hashTable_[neig_key] # llist specifies LinkedList object
-            del table[vertex]
+        for neig_key,neig_val in self[vertex]:
+            llist = self._hashTable_[neig_key] # llist specifies LinkedList object
+            llist.remove(vertex)
         del self._hashTable_[vertex]
 
 # =============================================================================
@@ -205,11 +173,11 @@ class AdjacencyList():
         if(type(edge) != tuple or len(edge) == 0):
             return
         startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
-        table = self._hashTable_[startVertex]
-        del table[endVertex]
+        llist = self._hashTable_[startVertex]
+        llist.remove(endVertex)
         if(self.isUndirectedGraph):
-            table = self._hashTable_[endVertex]
-            del table[startVertex]
+            llist = self._hashTable_[endVertex]
+            llist.remove(startVertex)
 
 # =============================================================================
     
@@ -220,12 +188,13 @@ class AdjacencyList():
         # so we use hashTable insted
         level,parent = ht.HashTable(),ht.HashTable()
         i = 1
-        level[vertex], parent[vertex] = 0, None
+        level[vertex] = 0
+        parent[vertex] = None
         frontier = [vertex]
         while(frontier):
             next = []
             for u in frontier:
-                for v_key in self[u]:
+                for v_key,v_value in self[u]:
                     if v_key not in level:
                         level[v_key] = i
                         parent[v_key] = u
@@ -250,100 +219,13 @@ class AdjacencyList():
 
 # =============================================================================
 
-    # Usage:
-    # for vert in g.DFS(vertex):
-    #    operation_with_vert(vert)     
-    def DFS(self,v):
-        if(type(v) == list):
-            yield from self.__DFS_List__(v)
-        else:
-            vertex = self.dtype(v)
-            parent = ht.HashTable()
-            parent[vertex] = None
-            yield vertex
-            yield from self.__DFS_Vertex__(vertex,parent)
-
-    def __DFS_List__(self,vertices):
-        #vertex = self.dtype(vertex)
-        parent = ht.HashTable()
-        for vertex in vertices:
-            if vertex not in parent:
-                l=[vertex]
-                parent[vertex] = None
-                for v in self.__DFS_Vertex__(vertex,parent): l.append(v)
-                yield l
-
-    def __DFS_Vertex__(self,vertex,parent):
-        for neig_vert in self[vertex]:
-            if neig_vert not in parent:
-                parent[neig_vert] = vertex
-                yield neig_vert
-                yield from self.__DFS_Vertex__(neig_vert,parent)
-
-    def __getDFSParentHashTable__(self,vertex):
-        vertex = self.dtype(vertex)
-        parent = ht.HashTable()
-        parent[vertex] = None
-        [ next_vert for next_vert in self.__DFS_Vertex__(vertex,parent)]
-        return parent
-
-    # It will return list of DFS of the vertex
-    def getDFS(self,vertex):
-        vertex = self.dtype(vertex)
-        return [i for i in self.DFS(vertex)]
-
-    def __cycleDFSHelper__(self,vertex,parent,l):
-        for neig_vert in self[vertex]:
-            if neig_vert not in parent:
-                parent[neig_vert] = vertex
-                l.append(neig_vert)
-                yield neig_vert
-                yield from self.__cycleDFSHelper__(neig_vert,parent,l)
-                l.pop()
-
-    def isCycleExist(self):             # Time complexity O(|V| + |E|), Space complexity O(|V|)
-        parent = ht.HashTable()         # parent is a HashTable of visited vertices Space Complexity: O(|V|)
-        for vertex in self.vertices():  # Time complexity O(|V|), Space complexity O(|V|)
-            l = [vertex]                # l is a list of vertices reachable from vertex Space Complexity: O(|V|)
-            if vertex not in parent:    # parent is a HashTable so Time complexity O(1)
-                parent[vertex] = None
-                for next_vert in self.__cycleDFSHelper__(vertex,parent,l):  # Space Complexity: O(1), Time Complexity: O(|V|)
-                    for i in range(len(l)):   # in case of unDirected we dont check for last vertex in l
-                        if(self.isUndirectedGraph == True and i == len(l) - 2): continue
-                        startVert, endVert = next_vert, l[i]
-                        table = self._hashTable_[startVert]
-                        if(endVert in table):   return True   # table  is a HashTable so Time complexity O(1)
-        return False
-
-# =============================================================================
-    
-    def __jobSchedule__(self,vertex,parent,l):
-        for neig in self[vertex]:
-            if neig not in parent:
-                parent[neig] = None
-                self.__jobSchedule__(neig,parent,l)
-                l.append(neig)
-    
-    def jobSchedule(self):
-        if(self.isUndirectedGraph): return
-        parent = ht.HashTable()
-        l = []
-        for vert in self.vertices():
-            if(vert not in parent):
-                parent[vert] = None
-                self.__jobSchedule__(vert,parent,l)
-                l.append(vert)
-        l.reverse()
-        return l
-
-# =============================================================================
-
-def createRandomGraph(no_of_vertices=3100,no_of_edges=3200,isUndirected = True):
+def createRandomGraph(no_of_vertices=3100,no_of_edges=3200):
     from random import randrange
-    g = AdjacencyList(dtype=int,isUndirectedGraph=isUndirected)
+    g = AdjacencyList(dtype=int)
     vertices = [i for i in range(no_of_vertices)]
     g.initializeVertices(vertices)
     ittr = 0
+    #print(i, no_of_edges)
     while(ittr < no_of_edges):
         startVertex = randrange(0,no_of_vertices)
         endVertex = randrange(0,no_of_vertices)
@@ -357,13 +239,83 @@ def createRandomGraph(no_of_vertices=3100,no_of_edges=3200,isUndirected = True):
 # It will take input a list that contain multiple lists or single graph.
 # Elements of this List contains a list that contains 2 lists
 # One list contain list of vertices and Second contains list of edges
-def load(path,isUndirected = True):
+def load(path):
     print("Loading DataSet...")
     no_graphs, graph_array=lib.load.load2(path);
-    if(no_graphs == 1): return AdjacencyList(graph_array[0][0],graph_array[0][1],isUndirectedGraph=isUndirected)
+    if(no_graphs == 1): return AdjacencyList(graph_array[0][0],graph_array[0][1])
     obj = []
     for i in range(len(graph_array)):
-        obj.append(AdjacencyList(graph_array[i][0],graph_array[i][1],isUndirectedGraph=isUndirected))
+        obj.append(AdjacencyList(graph_array[i][0],graph_array[i][1]))
+    print("DataSet Loaded.")
     return obj
 
 # =============================================================================
+
+################################## Example ####################################
+'''
+                                        # The Graph lools like
+vertices = [0,1,2,3,4]                  #        0            
+edges=[                                 #       /|\
+(0,1),                                  #      / | \
+(0,2),                                  #     /  |  \
+(0,3),                                  #    /   |   \
+(1,2),                                  #   1----2----3
+(1,4),                                  #   \    |   /
+(2,3),                                  #    \   |  /
+(2,4),                                  #     \  | /
+(3,4)                                   #      \ |/
+]                                       #        4
+
+g = AdjacencyList(vertices,edges)
+
+# Iterrate over the graph
+for neig in g:
+    print(neig)
+# Output:
+# ['4', ['1', '2', '3']]
+# ['0', ['1', '2', '3']]
+# ['2', ['0', '1', '3', '4']]
+# ['3', ['0', '2', '4']]
+# ['1', ['0', '2', '4']]
+
+# To get neighbour of any vertex V say V = 3
+neig = [key for key,val in g[3]]
+print(neig)   # Output: ['0', '2', '4']
+
+# To add a new edge There are 2 options Lets say you wanna make a edge b/w 1 and 4:
+# 1st way:      g[startVertex] = endVertex
+# 2nd way:      g.addNewEdge((startVertex,endVertex))
+g[1] = 4
+g.addNewEdge((1,4))
+
+# To add a new vertex There is 1 options Lets say you wanna make a vertex say 5:
+# g.addNewVertex(5)
+g.addNewVertex(5)
+
+# To delete a vertex there a 2 options Let say you wanna delete vertex 2:
+# 1st way   del g[vertex]
+# 2nd way   g.deleteVertex(vertex)
+del g[2]
+g.deleteVertex(2)
+
+# To delete an edge There is 1 options Lets say you wanna delete edge b/w 0 and 1:
+# g.deleteEdge((startVertex,endVertex))
+g.deleteEdge((0,1))
+
+# To get the shortest distance b/w 2 nodes Lets say you wanna find shortest distance b/w 1 and 3
+# g.shortestDistance(startVertex,endVertex)             # It will return a list of vertices showing path
+g = AdjacencyList(vertices,edges)
+l = g.shortestDistance(1,3)
+print(l)
+'''
+
+######################## If you have the node in a file ##########################
+
+'''
+#path = 'C:\\Users\\Yuvraj\\Desktop\\py\\Graph\\SpanningTree\\SpanningTreeDataset2.csv'
+path = 'C:\\Users\\Yuvraj\\Desktop\\py\\Graph\\SingleDataset.csv'
+g = load(path) # Say if you have only 1 graph in your file
+#print(g)        # Out: <__main__.AdjacencyList at 0xb0798d0>
+
+# Now you have your variable g now you can do as describe above
+'''
