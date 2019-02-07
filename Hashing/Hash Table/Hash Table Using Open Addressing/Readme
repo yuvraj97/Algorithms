@@ -1,10 +1,26 @@
 These results get from  100  test cases:
-With loadFactor of 0.5
-each test case: insert  1,000,000 elements
+With load Factor: 0.5
+each test case: insert  1000000 elements
 And search for each and every element
 And randomly deleting nodes
-According to the test, OpenAddressing on average Took : 1.4588115485070028  probes
-In our: 100  *  1000000  Inserts maximum probe taken is: 23
+According to our test, OpenAddressing on average Took : 1.4588115485070028  probes
+In our: 100  *  1000000  Inserts maximum prob taken is: 23
 Average Time spend per delete: 1.2415326505912441e-05  seconds
 Average Time spend per insert  4.041350326538086e-05  seconds
 Average Time spend per lookup : 7.476306738853455e-06 seconds
+Whole Testing took: 5408.591064453125  sec
+
+
+These results get from  100  test cases:
+With load Factor: 0.9
+each test case: insert  1000000 elements
+And search for each and every element
+And randomly deleting nodes
+Acc to our test, OpenAddressing on average Took : 2.5923693710398736  probes
+In our: 100  *  1000000  Inserts maximum prob taken is: 96
+Average Time spend per delete: 3.1105238630729314e-05  seconds
+Average Time spend per insert  6.629430690050125e-05  seconds
+Average Time spend per lookup : 7.791905200481416e-06 seconds
+Whole Testing took: 8972.393618106842  sec
+
+Source Code to get these results is in "Testing.py" file
