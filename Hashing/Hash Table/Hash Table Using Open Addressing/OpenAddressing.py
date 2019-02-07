@@ -53,7 +53,9 @@ class HashTable():
     
     # Usage h[key] ; it will return value associated with key
     def __getitem__(self,key):
-        return self.__find__(key)
+        node = self.__find__(key)
+        if(node == None): return
+        return node.value
     
 # =============================================================================
     
@@ -188,7 +190,7 @@ class HashTable():
         index = self.__getIndex__(key)
         if(index == -1):
             return None
-        return self._hashTable_[index][0].value
+        return self._hashTable_[index][0]
 
 # =============================================================================
 
@@ -207,12 +209,20 @@ class HashTable():
 # =============================================================================
 
     def __simpleHash__(self,key,mod):
-        if(type(key) == type(1)):  # it its of int type
+        if(type(key) == int):  # it its of int type
             return key % mod
-        elif(type(key) == type('str')):
+        elif(type(key) == str):
             return self.__stringToInt__(key,mod)
-        elif(type(key) == type(1.0)):
+        elif(type(key) == float):
             return int(key) % mod
+        elif(type(key) == tuple or type(key) == list):
+            res = 1
+            for i in key:
+                if(type(i) == str or type(i) == float):  
+                    i = self.__simpleHash__(i,mod)
+                    res = res*i
+                    res = res % mod
+            return res
         return None
 
 # =============================================================================
