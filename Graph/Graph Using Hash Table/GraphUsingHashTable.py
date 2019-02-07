@@ -326,6 +326,7 @@ class AdjacencyList():
     
     def jobSchedule(self):
         if(self.isUndirectedGraph): return
+        if(self.isCycleExist()): return
         parent = ht.HashTable()
         l = []
         for vert in self.vertices():
