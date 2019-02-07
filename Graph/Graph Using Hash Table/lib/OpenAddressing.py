@@ -53,7 +53,9 @@ class HashTable():
     
     # Usage h[key] ; it will return value associated with key
     def __getitem__(self,key):
-        return self.__find__(key)
+        node = self.__find__(key)
+        if(node == None): return
+        return node.value
     
 # =============================================================================
     
@@ -188,7 +190,7 @@ class HashTable():
         index = self.__getIndex__(key)
         if(index == -1):
             return None
-        return self._hashTable_[index][0].value
+        return self._hashTable_[index][0]
 
 # =============================================================================
 
@@ -207,12 +209,20 @@ class HashTable():
 # =============================================================================
 
     def __simpleHash__(self,key,mod):
-        if(type(key) == type(1)):  # it its of int type
+        if(type(key) == int):  # it its of int type
             return key % mod
-        elif(type(key) == type('str')):
+        elif(type(key) == str):
             return self.__stringToInt__(key,mod)
-        elif(type(key) == type(1.0)):
+        elif(type(key) == float):
             return int(key) % mod
+        elif(type(key) == tuple or type(key) == list):
+            res = 1
+            for i in key:
+                if(type(i) == str or type(i) == float):  
+                    i = self.__simpleHash__(i,mod)
+                    res = res*i
+                    res = res % mod
+            return res
         return None
 
 # =============================================================================
@@ -254,125 +264,4 @@ print(len(h))
 # check wether a key is in hash table or not
 key = 5
 print(key in h) # True
-'''
-
-###############################################################################
-############### All Below functions are just for testing purposes #############
-###############################################################################
-
-'''
-def getRandomHashTable(no_of_elements):
-    h = HashTable()
-    from random import getrandbits
-    import time
-    s = time.time()
-    
-    for i in range(no_of_elements):
-#        print("ittr: "+str(i))
-        no_of_bits = randrange(8,64)
-        k, v = getrandbits(no_of_bits),getrandbits(8)
-        h[k] =  v
-    e = time.time()
-    f=open('log.log','a')
-    f.write("Adding: ,"+str(len(h))+", took ,"+str(e - s)+", sec\n")
-    f.close()
-    return h
-
-# =============================================================================
-
-def removeHashTableRandomly(h):
-    from random import getrandbits
-    import time
-    s = time.time()
-    totalRemove = 0
-    i = 0
-    for k,v in h:
-        i += 1
- #       print("Itter:",i)
-        delete = getrandbits(1)
-        if(delete == 1):
-            totalRemove += 1
-            del h[k]
-    e = time.time()
-    f=open('log.log','a')
-    f.write("Removal of: ,"+str(totalRemove)+", took ,"+str(e - s)+", sec\n")
-    f.close()
-        
-# =============================================================================
- 
-def speedCheck(h):
-    import time
-    s = time.time()
-    j=0
-    for k,v in h:
-        j+=1
-        t = h[k]
-    e = time.time()
-    f=open('log.log','a') # these open and close again and again isn't necessary but I did it so that log.log file will update on realtime
-    f.write("Serching: ,"+str(len(h))+", took ,"+str(e - s)+", sec\n")
-    f.close()
-
-# =============================================================================
-
-# call createLog() to create logs of 100 test case each test case try to insert 1,000,000 nodes in Hashtable and randomlt delete them 
-# recording time consumed in each test case, so that we can later get the average speed by calling check()
-def createLog(path):
-    f=open(path,'w')
-    f.close()
-    for i in range(100):
-        h = getRandomHashTable(1000000)
-        speedCheck(h)
-        removeHashTableRandomly(h)
-        
-    f=open('log.log','a')
-    f.close()
-
-# Just call check() to check speed
-def check(path):
-    print("Creating Logs...")
-    print("Logs created:")
-    try:
-        f = open(path,'r')
-    except:
-        createLog(path)
-    f = open(path,'r')
-    s = f.read()
-    s = s.split('\n')
-    for i in range(len(s)):
-        s[i] = s[i].split(',')
-    add_t,search_t,delete_t = [],[],[]
-    count = 0
-    for i in range(len(s)):
-    	if(count==3): count = 0
-    	if(count == 0): add_t.append(float(s[i][3]))
-    	if(count == 1): search_t.append(float(s[i][3]))
-    	if(count == 2): delete_t.append(float(s[i][3]))
-    	count+=1
-    
-    add,search,delete = [],[],[]
-    count = 0
-    for i in range(len(s)):
-    	if(count==3): count = 0
-    	if(count == 0): add.append(int(s[i][1]))
-    	if(count == 1): search.append(int(s[i][1]))
-    	if(count == 2): delete.append(int(s[i][1]))
-    	count+=1
-    
-    add = [int(i) for i in add]
-    search = [int(i) for i in search]
-    delete = [int(i) for i in delete]
-
-    sum_add = sum(add)
-    sum_search = sum(search)
-    sum_delete = sum(delete)
-    t_delete = sum(delete_t)
-    t_add = sum(add_t)
-    t_search = sum(search_t)
-     
-    print("Average Time spend per delete :", t_delete/sum_delete,' second')
-
-    print('Average Time spend per insert :', t_add/sum_add , ' second')
-    
-    print('Average Time spend per lookup :', t_search/sum_search, ' second')
-    f.close()
 '''
