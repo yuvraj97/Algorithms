@@ -236,7 +236,12 @@ class AdjacencyList():
 
 # =============================================================================
     
-    def shortestDistance(self,startVertex,endVertex):
+    def shortestPathBFS(self,startVertex,endVertex):
+        for v,e in self._hashTable_:
+            for k,v in e:
+                if(v!=None): raise ValueError('Graph Must Not be Weighted. For Weighted Graph you can use shortestPathWeighted() method')
+                break
+            break
         startVertex,endVertex = self.dtype(startVertex), self.dtype(endVertex)
         level, parent = self.BFS(startVertex)
         l = []
@@ -339,6 +344,56 @@ class AdjacencyList():
 
 # =============================================================================
 
+    # 8-Feb-2019    
+    # Here we uses BFS technique but we had handeled the repetation of path in an efficient manner
+    def __shortestPathWeighted__(self,startVertex,parent,record,recursionTrace,rescueRepetition):
+        for neig in self[startVertex]:
+            if(neig not in recursionTrace):
+                weight = self._hashTable_[startVertex][neig]
+                if(record[neig] == None):
+                    record[neig] = weight + record[startVertex]
+                    parent[neig] = startVertex
+                elif(record[neig] > weight + record[startVertex]):
+                    record[neig] = weight + record[startVertex]
+                    parent[neig] = startVertex
+                elif(record[neig] <= weight + record[startVertex]):     # Here we are recording the that has weight > current weight
+                    if(startVertex not in rescueRepetition):            # In recursive call we will make sure that these edges should not be taken into consideraton
+                        rescueRepetition[startVertex] = ht.HashTable()
+                        rescueRepetition[startVertex][neig] = None
+                    else:
+                        rescueRepetition[startVertex][neig] = None
+        for neig in self[startVertex]:
+            if(neig not in recursionTrace):# and neig not in rescueRepetition):
+                if(startVertex in rescueRepetition and neig in rescueRepetition[startVertex]):
+                    pass
+                else:
+                    recursionTrace[neig] = startVertex
+                    self.__shortestPathWeighted__(neig,parent,record,recursionTrace,rescueRepetition)
+                    del recursionTrace[neig]
+                if(startVertex in rescueRepetition and neig in rescueRepetition[startVertex]):
+                    del rescueRepetition[startVertex][neig]
+
+    def shortestPathWeighted(self,startVertex,endVertex):
+        for v,e in self._hashTable_:
+            for k,v in e:
+                if(v==None): raise ValueError('Graph Must be Weighted. For an unweighted Graph you can use  shortestPathBFS() method')
+                break
+            break
+        record, parent = ht.HashTable(), ht.HashTable()
+        record[startVertex] = 0
+        parent[startVertex] = None
+        recursionTrace,rescueRepetition = ht.HashTable(), ht.HashTable()
+        self.__shortestPathWeighted__(startVertex,parent,record,recursionTrace,rescueRepetition)
+        l=[endVertex]
+        while(endVertex!=None):
+            endVertex=parent[endVertex]
+            l.append(endVertex)
+        l.pop()
+        l.reverse()
+        return l
+    
+# =============================================================================
+
 def createRandomGraph(no_of_vertices=3100,no_of_edges=3200,isUndirected = True):
     from random import randrange
     g = AdjacencyList(dtype=int,isUndirectedGraph=isUndirected)
@@ -354,17 +409,10 @@ def createRandomGraph(no_of_vertices=3100,no_of_edges=3200,isUndirected = True):
 
 # =============================================================================
 
-# If we have data of graphs in a file as shown in GraphDataset.csv and SingleDataset.csv file
-# It will take input a list that contain multiple lists or single graph.
-# Elements of this List contains a list that contains 2 lists
-# One list contain list of vertices and Second contains list of edges
+# If we have data of graphs in a file as shown in DataSet
 def load(path,isUndirected = True):
     print("Loading DataSet...")
-    no_graphs, graph_array=lib.load.load2(path);
-    if(no_graphs == 1): return AdjacencyList(graph_array[0][0],graph_array[0][1],isUndirectedGraph=isUndirected)
-    obj = []
-    for i in range(len(graph_array)):
-        obj.append(AdjacencyList(graph_array[i][0],graph_array[i][1],isUndirectedGraph=isUndirected))
-    return obj
+    vertices,edges=lib.load.load2(path);
+    return AdjacencyList(vertices,edges,isUndirectedGraph=isUndirected)    
 
 # =============================================================================
