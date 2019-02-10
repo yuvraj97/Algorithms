@@ -33,6 +33,8 @@ class AdjacencyList():
         self.noVertices = 0
         self.noEdges = 0
         self.dtype = dtype
+        self._isNegativeEdges_ = False
+        self._isWeighted_ = False
         self.isUndirectedGraph = isUndirectedGraph
         if(vertices!=None):
             self.initializeVertices(vertices)
@@ -84,9 +86,12 @@ class AdjacencyList():
     #        operation_wanna_performe_on_that_list(list_of_vertex_with_its_neig)
     def __iter__(self):
         for key_Vertex, value in self._hashTable_:   # here we ittertively get key, value pair of our hashTable; key is the vertex and the value is LinkedList of neighbours
-            y = [key_Vertex,[]]                                 # In y we store a vertex as it's 1st element and list of the neighbours of that vertex as 2nd element
-            for key, val in value:                   # Here now LinkedList will ittertively get it's nodes key, value pair
-                y[1].append(key)                                # we has stored neighbours as key
+            y = [key_Vertex,[]]                      # In y we store a vertex as it's 1st element and list of the neighbours of that vertex as 2nd element
+            for key, val in value:
+                if(val != None):
+                    y[1].append((key,val))
+                else:
+                    y[1].append(key)
             yield y
 
 # =============================================================================
@@ -106,6 +111,12 @@ class AdjacencyList():
     def getEdges(self):
         return [e for e in self.edges()]
     
+# =============================================================================
+
+    def copy(self):
+        g = AdjacencyList(self.getVertices(), self.getEdges(), isUndirectedGraph=self.isUndirectedGraph, dtype=self.dtype)
+        return g
+
 # =============================================================================
 
     # Usage: a.initializeVertices(vertices_list)
@@ -142,6 +153,7 @@ class AdjacencyList():
     def __edgeCondition__(self,edge):
         if(type(edge) != tuple): raise ValueError('Argument must be tuple')
         if(len(edge) == 0): raise ValueError('Length of tuple must not be 0')
+        if(len(edge) > 3):  raise ValueError('Length of tuple must not be greater then 3')
         startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
         if startVertex not in self._hashTable_: raise ValueError(startVertex,' is not a Vertex')
         if endVertex not in self._hashTable_: raise ValueError(endVertex,' is not a Vertex')
@@ -152,7 +164,10 @@ class AdjacencyList():
         startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
         if(self._hashTable_[startVertex][endVertex] != None): return
         if(len(edge)==3):
+            self._isWeighted_ = True
             value = edge[2]
+            if(value < 0):
+                self._isNegativeEdges_ = True
         else:
             value = None
         table = self._hashTable_[startVertex]  # # llist specifies LinkedList object
@@ -171,6 +186,11 @@ class AdjacencyList():
         startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
         return self._hashTable_[startVertex][endVertex]
     
+    def setValueOf(self,edge,value):
+        self.__edgeCondition__(edge)
+        startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
+        self._hashTable_[startVertex][endVertex] = value
+        
 # =============================================================================
     
     # vertex can be int or string
@@ -202,6 +222,7 @@ class AdjacencyList():
 # =============================================================================
 
     def deleteEdge(self,edge):
+        self.__edgeCondition__(edge)
         if(type(edge) != tuple or len(edge) == 0):
             return
         startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
@@ -236,13 +257,10 @@ class AdjacencyList():
 
 # =============================================================================
     
-    def shortestPathBFS(self,startVertex,endVertex):
-        for v,e in self._hashTable_:
-            for k,v in e:
-                if(v!=None): raise ValueError('Graph Must Not be Weighted. For Weighted Graph you can use shortestPathWeighted() method')
-                break
-            break
-        startVertex,endVertex = self.dtype(startVertex), self.dtype(endVertex)
+    def shortestPathBFS(self,edge):
+        if(self._isWeighted_ == False): raise ValueError('Graph Must Not be Weighted. For Weighted Graph you can use shortestPath() method')
+        self.__edgeCondition__(edge)
+        startVertex,endVertex = self.dtype(edge[0]), self.dtype(edge[1])
         level, parent = self.BFS(startVertex)
         l = []
         while endVertex != None:
@@ -344,54 +362,24 @@ class AdjacencyList():
 
 # =============================================================================
 
-    # 8-Feb-2019    
-    # Here we uses BFS technique but we had handeled the repetation of path in an efficient manner
-    def __shortestPathWeighted__(self,startVertex,parent,record,recursionTrace,rescueRepetition):
-        for neig in self[startVertex]:
-            if(neig not in recursionTrace):
-                weight = self._hashTable_[startVertex][neig]
-                if(record[neig] == None):
-                    record[neig] = weight + record[startVertex]
-                    parent[neig] = startVertex
-                elif(record[neig] > weight + record[startVertex]):
-                    record[neig] = weight + record[startVertex]
-                    parent[neig] = startVertex
-                elif(record[neig] <= weight + record[startVertex]):     # Here we are recording the that has weight > current weight
-                    if(startVertex not in rescueRepetition):            # In recursive call we will make sure that these edges should not be taken into consideraton
-                        rescueRepetition[startVertex] = ht.HashTable()
-                        rescueRepetition[startVertex][neig] = None
-                    else:
-                        rescueRepetition[startVertex][neig] = None
-        for neig in self[startVertex]:
-            if(neig not in recursionTrace):# and neig not in rescueRepetition):
-                if(startVertex in rescueRepetition and neig in rescueRepetition[startVertex]):
-                    pass
-                else:
-                    recursionTrace[neig] = startVertex
-                    self.__shortestPathWeighted__(neig,parent,record,recursionTrace,rescueRepetition)
-                    del recursionTrace[neig]
-                if(startVertex in rescueRepetition and neig in rescueRepetition[startVertex]):
-                    del rescueRepetition[startVertex][neig]
-
-    def shortestPathWeighted(self,startVertex,endVertex):
-        for v,e in self._hashTable_:
-            for k,v in e:
-                if(v==None): raise ValueError('Graph Must be Weighted. For an unweighted Graph you can use  shortestPathBFS() method')
-                break
-            break
-        record, parent = ht.HashTable(), ht.HashTable()
-        record[startVertex] = 0
-        parent[startVertex] = None
-        recursionTrace,rescueRepetition = ht.HashTable(), ht.HashTable()
-        self.__shortestPathWeighted__(startVertex,parent,record,recursionTrace,rescueRepetition)
-        l=[endVertex]
-        while(endVertex!=None):
-            endVertex=parent[endVertex]
-            l.append(endVertex)
-        l.pop()
-        l.reverse()
-        return l
-    
+    def shortestPath(self,edge,whichMethod="None"):
+            self.__edgeCondition__(edge)
+            #if(not self._isWeighted_):
+            #    raise ValueError("Graph isn't weighted")
+            whichMethod = whichMethod.lower()
+            startVertex,endVertex = edge[0],edge[1]
+            s = __ShortestPath__()
+            if(whichMethod=="t"):
+                return s.byTransformation(self,startVertex,endVertex)
+            elif(whichMethod=='d'):
+                return s.dijkstra(self,startVertex,endVertex)
+            elif(whichMethod=='test'):
+                return s.shortestPathWeighted(self,startVertex,endVertex)
+            if(not self._isNegativeEdges_):
+                return s.dijkstra(self,startVertex,endVertex)
+            else:
+                pass
+        
 # =============================================================================
 
 def createRandomGraph(no_of_vertices=3100,no_of_edges=3200,isUndirected = True):
@@ -416,3 +404,131 @@ def load(path,isUndirected = True):
     return AdjacencyList(vertices,edges,isUndirectedGraph=isUndirected)    
 
 # =============================================================================
+
+class __ShortestPath__:
+    
+    # 8-Feb-2019
+    def __shortestPathWeighted__(self,graph,startVertex,parent,record,recursionTrace,rescueRepetition):
+        for neig in graph[startVertex]:
+            if(neig not in recursionTrace):
+                weight = graph._hashTable_[startVertex][neig]
+                if(record[neig] == None):
+                    record[neig] = weight + record[startVertex]
+                    parent[neig] = startVertex
+                elif(record[neig] > weight + record[startVertex]):
+                    record[neig] = weight + record[startVertex]
+                    parent[neig] = startVertex
+                elif(record[neig] <= weight + record[startVertex]):     # Here we are recording the that has weight > current weight
+                    if(startVertex not in rescueRepetition):            # In recursive call we will make sure that these edges should not be taken into consideraton
+                        rescueRepetition[startVertex] = ht.HashTable()
+                        rescueRepetition[startVertex][neig] = None
+                    else:
+                        rescueRepetition[startVertex][neig] = None
+        for neig in graph[startVertex]:
+            if(neig not in recursionTrace):# and neig not in rescueRepetition):
+                if(startVertex in rescueRepetition and neig in rescueRepetition[startVertex]):
+                    pass
+                else:
+                    recursionTrace[neig] = startVertex
+                    self.__shortestPathWeighted__(graph,neig,parent,record,recursionTrace,rescueRepetition)
+                    del recursionTrace[neig]
+                if(startVertex in rescueRepetition and neig in rescueRepetition[startVertex]):
+                    del rescueRepetition[startVertex][neig]
+            
+    def shortestPathWeighted(self,graph,startVertex,endVertex):
+        record, parent = ht.HashTable(), ht.HashTable()
+        record[startVertex] = 0
+        parent[startVertex] = None
+        recursionTrace,rescueRepetition = ht.HashTable(), ht.HashTable()
+        self.__shortestPathWeighted__(graph,startVertex,parent,record,recursionTrace,rescueRepetition)
+        l=[endVertex]
+        while(endVertex!=None):
+            endVertex=parent[endVertex]
+            l.append(endVertex)
+        l.pop()
+        l.reverse()
+        return l
+    
+    def byTransformation(self,graph,startVertex,endVertex):
+        new_edges=[]
+        new_vertices=[]
+        for start,end,val in graph.edges():
+            if(val > 1):
+                prev_v = start
+                next_v = str('%')+str(start)+str(end)+str(0)
+                for i in range(val-1):
+                    new_vertices.append(next_v)
+                    new_edges.append((prev_v,next_v))
+                    prev_v = next_v
+                    next_v = str('%')+str(start)+str(end)+str(i+1)
+                new_vertices.append(next_v)
+                new_edges.append((prev_v,end))
+        new_vertices.extend(g.getVertices())
+        g1 = AdjacencyList(new_vertices,new_edges)
+        path = g1.getBFSPath((startVertex,endVertex))
+        l = []
+        for s in path:
+            if s[0] != '%':
+                l.append(s)
+        return l
+
+    # 10-Feb-2019
+    # O(V^2 + E)
+    def dijkstra(self,graph,startVertex,endVertex):
+        if(startVertex == endVertex):
+            return [startVertex,endVertex], 0
+        if(graph._isNegativeEdges_):
+            return
+        def extract_min(dist,Q):    # O(|V|)
+            minimum, ret_vert = None, None
+            for vert, dump in Q:
+                weight = dist[vert]
+                if(weight == None): continue
+                if(minimum == None):
+                    minimum = weight
+                    ret_vert = vert
+                else:
+                    if(weight < minimum):
+                        minimum = weight
+                        ret_vert = vert
+            return minimum,ret_vert
+        # Initialization
+        V = graph.getVertices()
+        Q = ht.HashTable()
+        for vert in V:
+            Q[vert] = None
+        parent = ht.HashTable()
+        for vert in V:
+            parent[vert] = None
+        dist = ht.HashTable()
+        for vert in V:
+            dist[vert] = None
+        dist[startVertex] = 0
+        
+        # Dijkstra Algorithm
+        while(len(Q) != 0):
+            minimum, vert = extract_min(dist,Q)
+            if(vert == None): break
+            del Q[vert]
+            for vertex,weight in graph.__neighbourNode__(vert):
+                if(dist[vertex] == None or dist[vertex] >  dist[vert] + weight):
+                    dist[vertex] = dist[vert] + weight
+                    parent[vertex] = vert
+                    
+        # Finally return the shortest path
+        l = [endVertex]
+        weight = dist[endVertex]
+        while(endVertex != None):
+            endVertex = parent[endVertex]
+            l.append(endVertex)
+        l.pop()
+        l.reverse()
+        if(len(l)==1): return  None
+        return (l,weight)
+
+###############################################################################
+
+#path = 'C:\\Users\\Yuvraj\\Desktop\\py\\Graph\\Weigted\\Graph 1.csv'
+#g = load(path,isUndirected=False)
+#u,v = 'S','E'
+#print(g.shortestPath((u,v)))

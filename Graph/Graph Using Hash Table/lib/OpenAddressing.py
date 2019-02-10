@@ -83,6 +83,19 @@ class HashTable():
 
 # =============================================================================
     
+    def __str__(self):
+        if(len(self)):
+            return '{}'
+        s = '{'
+        for node in self._hashTable_:
+            node = node[0]
+            if(node == None): continue
+            s = s +str((node.key,node.value)) + ', '
+        s = s[:-2]
+        return s + '}\n'
+
+# =============================================================================
+    
     # Usage:
     # key in hashTable
     # It will return either True (if key is in hashTable) or False (if key is not in hashTable)
