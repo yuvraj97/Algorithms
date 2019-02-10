@@ -5,8 +5,8 @@ There is one flag isUndirected if it's True(by default it is True). Then Graph i
 Example of creating a Graph is in GraphUsingHashTable.py
 
 There are some rules for csv file:
-1. The '#' works as a separator to separate Graphs.
-2. Just below the '#' cell specify ‘,’ (comma) separated vertices. 
+1. First line is used to lable if you want. I just put '#' in it.
+2. Just below the '#' cell, Specify ‘,’ (comma) separated vertices. 
 3. Below that cell there is bunch of pair or cells that represents edges.
 4. '!' is use as End Of File.
 
