@@ -369,7 +369,8 @@ class AdjacencyList():
             #if(not self._isWeighted_):
             #    raise ValueError("Graph isn't weighted")
             whichMethod = whichMethod.lower()
-            startVertex,endVertex = edge[0],edge[1]
+            startVertex,endVertex = self.dtype(edge[0]), self.dtype(edge[1])
+            if(startVertex == endVertex): return ([startVertex,startVertex],self._hashTable_[startVertex][startVertex])
             s = __ShortestPath__()
             if(whichMethod=="t"):
                 return s.byTransformation(self,startVertex,endVertex)
@@ -377,8 +378,14 @@ class AdjacencyList():
                 return s.dijkstra(self,startVertex,endVertex)
             elif(whichMethod=='test'):
                 return s.shortestPathWeighted(self,startVertex,endVertex)
+            elif(whichMethod=='d1'):
+                if(self._isNegativeEdges_): raise ValueError("Dijkstra don't accept negative vertices")
+                return s.dijkstraV1(self,startVertex,endVertex)
+            elif(whichMethod=='d2'):
+                if(self._isNegativeEdges_): raise ValueError("Dijkstra don't accept negative vertices")
+                return s.dijkstraV2(self,startVertex,endVertex)
             if(not self._isNegativeEdges_):
-                return s.dijkstra(self,startVertex,endVertex)
+                return s.dijkstraV2(self,startVertex,endVertex)
             else:
                 pass
         
@@ -465,7 +472,7 @@ class __ShortestPath__:
                     next_v = str('%')+str(start)+str(end)+str(i+1)
                 new_vertices.append(next_v)
                 new_edges.append((prev_v,end))
-        new_vertices.extend(g.getVertices())
+        new_vertices.extend(graph.getVertices())
         g1 = AdjacencyList(new_vertices,new_edges)
         path = g1.getBFSPath((startVertex,endVertex))
         l = []
@@ -474,13 +481,11 @@ class __ShortestPath__:
                 l.append(s)
         return l
 
-    # 10-Feb-2019
+    # 1-Feb-2019
     # O(V^2 + E)
-    def dijkstra(self,graph,startVertex,endVertex):
-        if(startVertex == endVertex):
-            return [startVertex,endVertex], 0
-        if(graph._isNegativeEdges_):
-            return
+    def dijkstraV1(self,graph,startVertex,endVertex):
+        if(startVertex == endVertex): return [startVertex,endVertex], 0
+        if(graph._isNegativeEdges_): return
         def extract_min(dist,Q):    # O(|V|)
             minimum, ret_vert = None, None
             for vert, dump in Q:
@@ -497,14 +502,11 @@ class __ShortestPath__:
         # Initialization
         V = graph.getVertices()
         Q = ht.HashTable()
-        for vert in V:
-            Q[vert] = None
+        for vert in V:  Q[vert] = None
         parent = ht.HashTable()
-        for vert in V:
-            parent[vert] = None
+        for vert in V:  parent[vert] = None
         dist = ht.HashTable()
-        for vert in V:
-            dist[vert] = None
+        for vert in V:  dist[vert] = None
         dist[startVertex] = 0
         
         # Dijkstra Algorithm
@@ -516,8 +518,90 @@ class __ShortestPath__:
                 if(dist[vertex] == None or dist[vertex] >  dist[vert] + weight):
                     dist[vertex] = dist[vert] + weight
                     parent[vertex] = vert
-                    
-        # Finally return the shortest path
+        return self.__dijkstra_HT_to_list__(parent,dist,endVertex)
+    
+    # 2-Feb-2-18
+    # O( V*lg(V) + E*lg(V) )
+    def dijkstraV2(self,graph,startVertex,endVertex):
+        def extract_min(q):
+            q[-1][3]=0
+            q[0],q[-1] = q[-1], q[0]
+            ret = q.pop()
+            min_heapify(q,len(q),0)
+            return ret
+        def min_heapify(a,n,i):     # O(lg(V))
+            if(2*i + 1 < n):
+                if(a[i][0] == None and a[2*i + 1][0] != None):
+                    a[i], a[2*i + 1] = a[2*i + 1], a[i]
+                    a[i][3], a[2*i + 1][3] = a[2*i + 1][3], a[i][3]
+                    min_heapify(a,n,2*i + 1)
+                elif(a[i][0]!=None and a[2*i + 1][0] !=None):
+                    if(a[i][0] > a[2*i + 1][0]):
+                        a[i], a[2*i + 1] = a[2*i + 1], a[i]
+                        a[i][3], a[2*i + 1][3] = a[2*i + 1][3], a[i][3]
+                        min_heapify(a,n,2*i + 1)
+            if(2*i + 2 < n):
+                if(a[i][0] == None and a[2*i + 2][0] != None):
+                    a[i], a[2*i + 2] = a[2*i + 2], a[i]
+                    a[i][3], a[2*i + 2][3] = a[2*i + 2][3], a[i][3]
+                    min_heapify(a,n,2*i + 2)
+                elif(a[i][0] != None and a[2*i + 2][0] != None):
+                    if(a[i][0] > a[2*i + 2][0]):
+                        a[i], a[2*i + 2] = a[2*i + 2], a[i]
+                        a[i][3], a[2*i + 2][3] = a[2*i + 2][3], a[i][3]
+                        min_heapify(a,n,2*i + 2)
+        def move_up(Q,H,vertex):    #O(lg(V))
+            vertex = vertex[1]
+            curr_Q = H[vertex]
+            index = curr_Q[3]
+            while(index>0):
+                parent_index = (index - 1)//2
+                if(Q[parent_index][0] == None or Q[parent_index][0] > Q[index][0]):
+                    Q[parent_index], Q[index] =  Q[index], Q[parent_index]
+                    Q[parent_index][3], Q[index][3] =  Q[index][3], Q[parent_index][3]
+                else:
+                    break
+                index = parent_index
+        def relax(u,v,weight,Q,H):    # O(lg(V))
+            curr_Q_value_v = H[v]     # it will go to H and return list refrence from Q of vertex v
+            curr_Q_value_u = H[u]
+            if(curr_Q_value_v[0] == None or curr_Q_value_v[0] > curr_Q_value_u[0] + weight):
+                curr_Q_value_v[0] = curr_Q_value_u[0] + weight
+                curr_Q_value_v[2] = u
+                move_up(Q,H,curr_Q_value_v)
+        if(graph._isNegativeEdges_):
+            return
+        
+        # Initialization
+        Q = [[0,startVertex,None,0]] # Here Q will record the distance path b/w vertices 1st element: cost, 2nd element: vertex, 3rd element: parent, 4th element: index
+        H = ht.HashTable()      # we require this hashTable cause in relax part if we don't use hash table then
+                                # to updating the cost of vertex v in Q we have to scan whole array Q to find v and then update cost
+        i = 0                   # H provides us element of Q in O(1) i.e. it will give us Q[v] in O(1)
+        H[startVertex] = Q[i] 
+        for vertex in graph.vertices():
+            if(vertex == startVertex):  continue
+            i += 1
+            Q.append([None,vertex,None,i])
+            H[vertex] = Q[i]
+        S = []
+        
+        # Dijkstra Algorithm
+        while(len(Q) != 0):
+            u = extract_min(Q)
+            S.append(u)
+            if(u[0] == None): break
+            for vertex,weight in graph.__neighbourNode__(u[1]):
+                relax(u[1],vertex,weight,Q,H)
+                
+        # Finally return the path
+        parent = ht.HashTable()
+        weig = ht.HashTable()
+        for i in range(len(S)):
+            parent[S[i][1]] = S[i][2]
+            weig[S[i][1]] = S[i][0]
+        return self.__dijkstra_HT_to_list__(parent,weig,endVertex)
+    
+    def __dijkstra_HT_to_list__(self,parent,dist,endVertex):
         l = [endVertex]
         weight = dist[endVertex]
         while(endVertex != None):
@@ -528,9 +612,16 @@ class __ShortestPath__:
         if(len(l)==1): return  None
         return (l,weight)
 
-###############################################################################
 
-#path = 'C:\\Users\\Yuvraj\\Desktop\\py\\Graph\\Weigted\\Graph 1.csv'
-#g = load(path,isUndirected=False)
-#u,v = 'S','E'
-#print(g.shortestPath((u,v)))
+###############################################################################
+'''
+path = 'C:\\Users\\Yuvraj\\Desktop\\py\\Graph\\Weigted\\Graph 1.csv'
+g = load(path,isUndirected=False)
+u,v = 'S','E'
+p1 = g.shortestPath((u,v),'d1')
+print(p1)
+p1 = g.shortestPath((u,v))
+print(p1)
+p1 = g.shortestPath((u,v),'d2')
+print(p1)
+'''
