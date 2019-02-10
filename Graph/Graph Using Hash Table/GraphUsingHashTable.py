@@ -474,7 +474,7 @@ class __ShortestPath__:
                 l.append(s)
         return l
 
-    # 10-Feb-2019
+    # 1-Feb-2019
     # O(V^2 + E)
     def dijkstra(self,graph,startVertex,endVertex):
         if(startVertex == endVertex):
