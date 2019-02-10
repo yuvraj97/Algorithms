@@ -412,8 +412,10 @@ def load(path,isUndirected = True):
     vertices,edges=lib.load.load2(path);
     return AdjacencyList(vertices,edges,isUndirectedGraph=isUndirected)    
 
-# =============================================================================
-
+# #############################################################################
+# ######################## Shortest Path Algorithms ###########################
+# #############################################################################
+    
 class __ShortestPath__:
     
     # 8-Feb-2019
@@ -443,6 +445,8 @@ class __ShortestPath__:
                     del recursionTrace[neig]
                 if(startVertex in rescueRepetition and neig in rescueRepetition[startVertex]):
                     del rescueRepetition[startVertex][neig]
+
+# =============================================================================
             
     def shortestPathWeighted(self,graph,startVertex,endVertex):
         record, parent = ht.HashTable(), ht.HashTable()
@@ -457,6 +461,8 @@ class __ShortestPath__:
         l.pop()
         l.reverse()
         return l
+
+# =============================================================================
     
     def byTransformation(self,graph,startVertex,endVertex):
         new_edges=[]
@@ -480,6 +486,8 @@ class __ShortestPath__:
             if s[0] != '%':
                 l.append(s)
         return l
+
+# =============================================================================
 
     # 1-Feb-2019
     # O(V^2 + E)
@@ -519,16 +527,20 @@ class __ShortestPath__:
                     dist[vertex] = dist[vert] + weight
                     parent[vertex] = vert
         return self.__dijkstra_HT_to_list__(parent,dist,endVertex)
+
+# =============================================================================
     
     # 2-Feb-2019
     # O( V*lg(V) + E*lg(V) )
     def dijkstraV2(self,graph,startVertex,endVertex):
+        # =====================================================================
         def extract_min(q):
             q[-1][3]=0
             q[0],q[-1] = q[-1], q[0]
             ret = q.pop()
             min_heapify(q,len(q),0)
             return ret
+        # =====================================================================
         def min_heapify(a,n,i):     # O(lg(V))
             if(2*i + 1 < n):
                 if(a[i][0] == None and a[2*i + 1][0] != None):
@@ -550,6 +562,7 @@ class __ShortestPath__:
                         a[i], a[2*i + 2] = a[2*i + 2], a[i]
                         a[i][3], a[2*i + 2][3] = a[2*i + 2][3], a[i][3]
                         min_heapify(a,n,2*i + 2)
+        # =====================================================================
         def move_up(Q,H,vertex):    #O(lg(V))
             vertex = vertex[1]
             curr_Q = H[vertex]
@@ -562,6 +575,7 @@ class __ShortestPath__:
                 else:
                     break
                 index = parent_index
+        # =====================================================================
         def relax(u,v,weight,Q,H):    # O(lg(V))
             curr_Q_value_v = H[v]     # it will go to H and return list refrence from Q of vertex v
             curr_Q_value_u = H[u]
@@ -569,14 +583,15 @@ class __ShortestPath__:
                 curr_Q_value_v[0] = curr_Q_value_u[0] + weight
                 curr_Q_value_v[2] = u
                 move_up(Q,H,curr_Q_value_v)
+        # =====================================================================
+        
         if(graph._isNegativeEdges_):
             return
-        
         # Initialization
         Q = [[0,startVertex,None,0]] # Here Q will record the distance path b/w vertices 1st element: cost, 2nd element: vertex, 3rd element: parent, 4th element: index
-        H = ht.HashTable()      # we require this hashTable cause in relax part if we don't use hash table then
-                                # to updating the cost of vertex v in Q we have to scan whole array Q to find v and then update cost
-        i = 0                   # H provides us element of Q in O(1) i.e. it will give us Q[v] in O(1)
+        H = ht.HashTable()           # we require this hashTable cause in relax part if we don't use hash table then
+                                     # to updating the cost of vertex v in Q we have to scan whole array Q to find v and then update cost
+        i = 0                        # H provides us element of Q in O(1) i.e. it will give us Q[v] in O(1)
         H[startVertex] = Q[i] 
         for vertex in graph.vertices():
             if(vertex == startVertex):  continue
@@ -600,6 +615,8 @@ class __ShortestPath__:
             parent[S[i][1]] = S[i][2]
             weig[S[i][1]] = S[i][0]
         return self.__dijkstra_HT_to_list__(parent,weig,endVertex)
+
+# =============================================================================
     
     def __dijkstra_HT_to_list__(self,parent,dist,endVertex):
         l = [endVertex]
@@ -611,7 +628,6 @@ class __ShortestPath__:
         l.reverse()
         if(len(l)==1): return  None
         return (l,weight)
-
 
 ###############################################################################
 '''
