@@ -19,6 +19,8 @@ Created on Sun Feb  3 05:00:16 2019
 import lib.OpenAddressing as ht
 #import lib.HashTable as ht
 import lib.load
+# Use of lib.HashTable is not supported more you may face errors using lib.HashTable
+# But you can use it for learning
 
 # Arguments in AdjacencyList
 # Here vertices is a list,array of vertices(that can be int or string)
@@ -340,14 +342,14 @@ class AdjacencyList():
 
 # =============================================================================
     
-    def __jobSchedule__(self,vertex,parent,l):
+    def __topologicalSort__(self,vertex,parent,l):
         for neig in self[vertex]:
             if neig not in parent:
                 parent[neig] = None
-                self.__jobSchedule__(neig,parent,l)
+                self.__topologicalSort__(neig,parent,l)
                 l.append(neig)
     
-    def jobSchedule(self):
+    def topologicalSort(self):
         if(self.isUndirectedGraph): return
         if(self.isCycleExist()): return
         parent = ht.HashTable()
@@ -355,7 +357,7 @@ class AdjacencyList():
         for vert in self.vertices():
             if(vert not in parent):
                 parent[vert] = None
-                self.__jobSchedule__(vert,parent,l)
+                self.__topologicalSort__(vert,parent,l)
                 l.append(vert)
         l.reverse()
         return l
