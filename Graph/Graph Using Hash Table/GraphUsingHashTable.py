@@ -489,7 +489,7 @@ class __ShortestPath__:
 
 # =============================================================================
 
-    # 1-Feb-2019
+    # 10-Feb-2019
     # O(V^2 + E)
     def dijkstraV1(self,graph,startVertex,endVertex):
         if(startVertex == endVertex): return [startVertex,endVertex], 0
@@ -530,7 +530,7 @@ class __ShortestPath__:
 
 # =============================================================================
     
-    # 2-Feb-2019
+    # 11-Feb-2019
     # O( V*lg(V) + E*lg(V) )
     def dijkstraV2(self,graph,startVertex,endVertex):
         # =====================================================================
