@@ -520,7 +520,7 @@ class __ShortestPath__:
                     parent[vertex] = vert
         return self.__dijkstra_HT_to_list__(parent,dist,endVertex)
     
-    # 2-Feb-2018
+    # 2-Feb-2019
     # O( V*lg(V) + E*lg(V) )
     def dijkstraV2(self,graph,startVertex,endVertex):
         def extract_min(q):
