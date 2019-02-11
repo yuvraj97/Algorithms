@@ -5,17 +5,14 @@ Created on Sun Feb  3 05:00:16 2019
 @author: Yuvraj
 """
 
-# Main diffrence in this and previous version is that I replaced LinkedList with HashTable
-# And also implemented some more methods like for: BFS, DFS, Cycle Detection
-
 # Here we uses Hash Table to implement Adjacency List
 # vertices works as key (indexof hashTable) and the neighbours as there values
 # each neighbour has its own value initially it's None but we can use it in numerous ways
 # like when solving for travelling salesman value of each neighbour represents
 # cost from the key to it's value. Mean cost associated  from one node to the another
 
-# to use OpenAddressing Hash Table just uncomment line number 19 and comment line number 20
-# to use Chaining Hash Table just uncomment line number 20 and comment line number 19
+# to use OpenAddressing Hash Table just comment 'import lib.HashTable as ht' and uncomment 'import lib.OpenAddressing as ht'
+# to use Chaining Hash Table just comment import lib.OpenAddressing as ht and uncomment 'import lib.HashTable as ht'
 import lib.OpenAddressing as ht
 #import lib.HashTable as ht
 import lib.load
@@ -98,6 +95,19 @@ class AdjacencyList():
 
 # =============================================================================
 
+    def __str__(self):
+        s = '{\n'
+        for v,e in self:
+            s = s + '\t' + str(v) + ": ["
+            for edge in e:
+                s = s + str(edge) + ', '
+            s = s[:-2]
+            s += ']\n'
+        s += '}'
+        return  s
+            
+# =============================================================================
+
     def vertices(self):
         for vert,edge in self:
             yield vert
@@ -105,7 +115,7 @@ class AdjacencyList():
     def edges(self):
         for vertex,neig in self._hashTable_:
             for k,v in neig:
-                yield (vertex,k)
+                yield (vertex,k,v)
     
     def getVertices(self):
         return [ v for v in self.vertices() ]
@@ -166,13 +176,14 @@ class AdjacencyList():
         startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
         if(self._hashTable_[startVertex][endVertex] != None): return
         if(len(edge)==3):
-            self._isWeighted_ = True
             value = edge[2]
-            if(value < 0):
-                self._isNegativeEdges_ = True
+            if(value != None):
+                self._isWeighted_ = True
+                if(value < 0):
+                    self._isNegativeEdges_ = True
         else:
             value = None
-        table = self._hashTable_[startVertex]  # # llist specifies LinkedList object
+        table = self._hashTable_[startVertex]
         if(table == None): return
         if(table[endVertex] != None): return
         self.noEdges += 1
@@ -259,8 +270,8 @@ class AdjacencyList():
 
 # =============================================================================
     
-    def shortestPathBFS(self,edge):
-        if(self._isWeighted_ == False): raise ValueError('Graph Must Not be Weighted. For Weighted Graph you can use shortestPath() method')
+    def __shortestPathBFS__(self,edge):
+        if(self._isWeighted_): raise ValueError('Graph Must Not be Weighted. For Weighted Graph you can use shortestPath() method')
         self.__edgeCondition__(edge)
         startVertex,endVertex = self.dtype(edge[0]), self.dtype(edge[1])
         level, parent = self.BFS(startVertex)
@@ -365,44 +376,34 @@ class AdjacencyList():
 # =============================================================================
 
     def shortestPath(self,edge,whichMethod="None"):
-            self.__edgeCondition__(edge)
-            #if(not self._isWeighted_):
-            #    raise ValueError("Graph isn't weighted")
-            whichMethod = whichMethod.lower()
-            startVertex,endVertex = self.dtype(edge[0]), self.dtype(edge[1])
-            if(startVertex == endVertex): return ([startVertex,startVertex],self._hashTable_[startVertex][startVertex])
-            s = __ShortestPath__()
-            if(whichMethod=="t"):
-                return s.byTransformation(self,startVertex,endVertex)
-            elif(whichMethod=='d'):
-                return s.dijkstra(self,startVertex,endVertex)
-            elif(whichMethod=='test'):
-                return s.shortestPathWeighted(self,startVertex,endVertex)
-            elif(whichMethod=='d1'):
-                if(self._isNegativeEdges_): raise ValueError("Dijkstra don't accept negative vertices")
-                return s.dijkstraV1(self,startVertex,endVertex)
-            elif(whichMethod=='d2'):
-                if(self._isNegativeEdges_): raise ValueError("Dijkstra don't accept negative vertices")
-                return s.dijkstraV2(self,startVertex,endVertex)
-            if(not self._isNegativeEdges_):
-                return s.dijkstraV2(self,startVertex,endVertex)
-            else:
-                pass
-        
-# =============================================================================
-
-def createRandomGraph(no_of_vertices=3100,no_of_edges=3200,isUndirected = True):
-    from random import randrange
-    g = AdjacencyList(dtype=int,isUndirectedGraph=isUndirected)
-    vertices = [i for i in range(no_of_vertices)]
-    g.initializeVertices(vertices)
-    ittr = 0
-    while(ittr < no_of_edges):
-        startVertex = randrange(0,no_of_vertices)
-        endVertex = randrange(0,no_of_vertices)
-        g.addNewEdge((startVertex,endVertex))
-        ittr = g.noOfEdges()
-    return g
+        self.__edgeCondition__(edge)
+        if(not self._isWeighted_):
+            return self.__shortestPathBFS__(edge)
+        whichMethod = whichMethod.lower()
+        startVertex,endVertex = self.dtype(edge[0]), self.dtype(edge[1])
+        if(startVertex == endVertex): 
+            val = self._hashTable_[startVertex][startVertex]
+            if(val == None): val = 0
+            return ([startVertex,startVertex],val)
+        s = __ShortestPath__()
+        if(whichMethod=="t"):
+            return s.byTransformation(self,startVertex,endVertex)
+        elif(whichMethod=='d'):
+            return s.dijkstra(self,startVertex,endVertex)
+        elif(whichMethod=='test'):
+            return s.shortestPathWeighted(self,startVertex,endVertex)
+        elif(whichMethod=='d1'):
+            if(self._isNegativeEdges_): raise ValueError("Dijkstra don't accept negative vertices")
+            return s.dijkstraV1(self,startVertex,endVertex)
+        elif(whichMethod=='d2'):
+            if(self._isNegativeEdges_): raise ValueError("Dijkstra don't accept negative vertices")
+            return s.dijkstraV2(self,startVertex,endVertex)
+        elif(whichMethod=='b'):
+            return s.bellman_ford(self,startVertex,endVertex)
+        if(not self._isNegativeEdges_):
+            return s.dijkstraV2(self,startVertex,endVertex)
+        else:
+            return s.bellman_ford(self,startVertex,endVertex)
 
 # =============================================================================
 
@@ -526,8 +527,8 @@ class __ShortestPath__:
                 if(dist[vertex] == None or dist[vertex] >  dist[vert] + weight):
                     dist[vertex] = dist[vert] + weight
                     parent[vertex] = vert
-        return self.__dijkstra_HT_to_list__(parent,dist,endVertex)
-
+        return self.__htable_to_list__(parent,dist,endVertex)
+        
 # =============================================================================
     
     # 11-Feb-2019
@@ -614,11 +615,38 @@ class __ShortestPath__:
         for i in range(len(S)):
             parent[S[i][1]] = S[i][2]
             weig[S[i][1]] = S[i][0]
-        return self.__dijkstra_HT_to_list__(parent,weig,endVertex)
+        return self.__htable_to_list__(parent,weig,endVertex)
 
 # =============================================================================
     
-    def __dijkstra_HT_to_list__(self,parent,dist,endVertex):
+    # 11-Feb-2019
+    def bellman_ford(self,graph,startVertex,endVertex):
+        def relax(u,v,w,dist,parent):
+            if(dist[u] == None): return
+            if(dist[v] == None or dist[v] > dist[u] + w):
+                dist[v] = dist[u] + w
+                parent[v] = u
+
+        # Initialization
+        parent = ht.HashTable()
+        dist = ht.HashTable()
+        for vert in graph.vertices():
+            parent[vert],dist[vert] = None,None
+        dist[startVertex] = 0
+        
+        # Bellman-Ford Algo
+        for _ in range(graph.noOfVertices()):
+            for u,v,w in graph.edges():
+                relax(u,v,w,dist,parent)
+        # Check  if there is any -ve cycle in path of startVertex
+        for u,v,w in graph.edges():
+            if(dist[u] == None):continue
+            if(dist[v] > dist[u] + w):  return None
+        return self.__htable_to_list__(parent,dist,endVertex)
+
+# =============================================================================
+    
+    def __htable_to_list__(self,parent,dist,endVertex):
         l = [endVertex]
         weight = dist[endVertex]
         while(endVertex != None):
@@ -634,10 +662,6 @@ class __ShortestPath__:
 path = 'C:\\Users\\Yuvraj\\Desktop\\py\\Graph\\Weigted\\Graph 1.csv'
 g = load(path,isUndirected=False)
 u,v = 'S','E'
-p1 = g.shortestPath((u,v),'d1')
-print(p1)
 p1 = g.shortestPath((u,v))
-print(p1)
-p1 = g.shortestPath((u,v),'d2')
 print(p1)
 '''
