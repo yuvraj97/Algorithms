@@ -97,12 +97,17 @@ class AdjacencyList():
 
     def __str__(self):
         s = '{\n'
+        flag = False
         for v,e in self:
             s = s + '\t' + str(v) + ": ["
             for edge in e:
                 s = s + str(edge) + ', '
-            s = s[:-2]
-            s += ']\n'
+                flag = True
+            if(flag):
+                s = s[:-2]
+            s += ']'
+            flag = False
+            s += '\n'
         s += '}'
         return  s
             
@@ -203,7 +208,10 @@ class AdjacencyList():
         self.__edgeCondition__(edge)
         startVertex, endVertex = self.dtype(edge[0]), self.dtype(edge[1])
         self._hashTable_[startVertex][endVertex] = value
-        
+        if(value == None and self.isUndirectedGraph):
+            print("Warning: your graph is undirected and you had set a value to an edge")
+            print("You can undo it by again setting the value to None")
+
 # =============================================================================
     
     # vertex can be int or string
