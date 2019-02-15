@@ -144,7 +144,7 @@ class HashTable():
 
     # __universalHash2__  need to be co-prime with self.size
     # I had taken care of it in __universalHash2__()
-    def __quad_probing_(self,key,i):        # Quadratic Probing:  [ h(k,i) = (h1(k) + i*h2(k)) mod m ]
+    def __quad_probing_(self,key,i):        # Double Hashing :  [ h(k,i) = (h1(k) + i*h2(k)) mod m ]
         ans = ( self.__universalHash1__(key) + i * self.__universalHash2__(key) ) % self._size_
         return ans
 
