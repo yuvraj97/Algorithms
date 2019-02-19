@@ -1,6 +1,6 @@
 This program Uses Newton's Method to find nth root of a number(base 10)
 
-Use: nth_root(n,nthRoot,precision=20) method
+Use: nth_root() method
 
 It takes 3 arguments:
 
