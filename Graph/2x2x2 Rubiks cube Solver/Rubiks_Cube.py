@@ -133,4 +133,6 @@ def shuffleManually(l):
             start = __rotate__(start,FC)
         elif(s == "fcc"):
             start = __rotate__(start,FCC)
+        else:
+            raise ValueError('"'+ str(step) + '" is not a valid argument (')
     return start
