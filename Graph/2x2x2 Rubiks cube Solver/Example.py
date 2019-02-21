@@ -22,9 +22,20 @@ s = cube.solveRubiksCube(initial,final)
 print("To reach from final configuration to initial configuration perform these steps:")
 print(s)
 
+print("# ---------------------------------------\n")
+
 final   = cube.random_shuffle_cube(cube.I,7)
 initial = cube.I
 s = cube.solveRubiksCube(initial,final)
 print("To reach from final configuration to initial configuration perform these steps:")
 print(s)
-    
+
+print("# ---------------------------------------\n")
+
+final   = ["UCC", "FC", "UCC", "FCC", "FCC", "RCC", "FCC", "RCC"]
+initial = ["RC","FCC","UCC","RC","FC","RC","FC","UC","RC","UC"]
+initial = cube.shuffleManually(initial)
+final   = cube.shuffleManually(final)
+s = cube.solveRubiksCube(initial,final)
+print("To reach from final configuration to initial configuration perform these steps:")
+print(s)
