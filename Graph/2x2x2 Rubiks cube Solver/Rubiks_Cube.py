@@ -116,3 +116,21 @@ def solveRubiksCube(initial,final):
         s = s + back[i] + " --> "
     s = s + "Solved :)"
     return s
+
+def shuffleManually(l):
+    start = I
+    for step in l:
+        s = step.lower()
+        if(s == "rcc"):
+            start = __rotate__(start,RCC)
+        elif(s == "rc"):
+            start = __rotate__(start,RC)
+        elif(s == "uc"):
+            start = __rotate__(start,UC)
+        elif(s == "ucc"):
+            start = __rotate__(start,UCC)
+        elif(s == "fc"):
+            start = __rotate__(start,FC)
+        elif(s == "fcc"):
+            start = __rotate__(start,FCC)
+    return start
