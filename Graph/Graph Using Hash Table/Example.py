@@ -7,6 +7,8 @@ Created on Thu Feb  7 06:27:43 2019
 
 import GraphUsingHashTable as graph
 
+
+
 # Currently implemented Data Structures:
 # Hash Table(Using Open Addressing)
 # Binary Heap(Used in Dijkstra)
@@ -142,36 +144,48 @@ print(g.topologicalSort())
 
 ######################## If you have the Graph in a file ##########################
 
-pathNegative  = 'C:\\Users\\Yuvraj\\Desktop\\py\\Graph\\Weigted\\Negative Graph 3.csv'
-pathUD        = 'C:\\Users\\Yuvraj\\Desktop\\py\\Graph\\Undirected Graph\\Graph 4.csv'
-pathWeighted  = 'C:\\Users\\Yuvraj\\Desktop\\py\\Graph\\Weigted\\Graph 1.csv'
-pathD         = 'C:\\Users\\Yuvraj\\Desktop\\py\\Graph\\Directed Graph\\DirectedGraph3.csv'
+pathNegative  = 'C:\\Users\\Yuvraj\\Documents\\GitHub\\Algorithms\\Graph\\Graph Using Hash Table\\DataSet\\Weigted\\Negative Graph 3.csv'
+pathUD        = 'C:\\Users\\Yuvraj\\Documents\\GitHub\\Algorithms\\Graph\\Graph Using Hash Table\\DataSet\\Undirected Graph\\Graph 4.csv'
+pathWeighted  = 'C:\\Users\\Yuvraj\\Documents\\GitHub\\Algorithms\\Graph\\Graph Using Hash Table\\DataSet\\Weigted\\Graph 1.csv'
+pathD         = 'C:\\Users\\Yuvraj\\Documents\\GitHub\\Algorithms\\Graph\\Graph Using Hash Table\\DataSet\\Directed Graph\\DirectedGraph3.csv'
+pathDAG       = 'C:\\Users\\Yuvraj\\Documents\\GitHub\\Algorithms\\Graph\\Graph Using Hash Table\\DataSet\\DAG\\DAG-2.csv'
 gNegative     = graph.load(pathNegative,isUndirected=False)
-gUD           = graph.load(pathUD,isUndirected=True)
+gUD           = graph.load(pathUD,      isUndirected=True)
 gWeighted     = graph.load(pathWeighted,isUndirected=False)
-gD            = graph.load(pathD,isUndirected=False)
+gD            = graph.load(pathD,       isUndirected=False)
+gDAG          = graph.load(pathDAG,     isUndirected=False)
 
 gNegative_path = gNegative.shortestPath(('C','D'))
 gUD_path       = gUD.shortestPath((2,3))
 gWeighted_path = gWeighted.shortestPath(('A','C'))
 gD_path        = gD.shortestPath(('G','D'))
+gDAG_path      = gDAG.shortestPath(('O','G' ))
 
 print(gNegative_path)
 print(gUD_path)
 print(gWeighted_path)
 print(gD_path)
+print(gDAG_path)
 
 '''
 for u in gNegative.vertices():
     for v in gNegative.vertices():
+        print("Path from:",u, " to:",v,end=" ::")
         print(gNegative.shortestPath((u,v)))
 for u in gUD.vertices():
     for v in gUD.vertices():
+        print("Path from:",u, " to:",v,end=" ::")
         print(gUD.shortestPath((u,v)))
 for u in gWeighted.vertices():
     for v in gWeighted.vertices():
+        print("Path from:",u, " to:",v,end=" ::")
         print(gWeighted.shortestPath((u,v)))
 for u in gD.vertices():
     for v in gD.vertices():
+        print("Path from:",u, " to:",v,end=" ::")
         print(gD.shortestPath((u,v)))
+for u in gDAG.vertices():
+    for v in gDAG.vertices():
+        print("Path from:",u, " to:",v,end=" ::")
+        print(gDAG.shortestPath((u,v)))
 '''

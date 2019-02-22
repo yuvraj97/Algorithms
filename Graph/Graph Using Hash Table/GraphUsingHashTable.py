@@ -408,8 +408,13 @@ class AdjacencyList():
             return s.dijkstraV2(self,startVertex,endVertex)
         elif(whichMethod=='b'):
             return s.bellman_ford(self,startVertex,endVertex)
+        elif(whichMethod=='dag'):
+            return s.topological_path(self,startVertex,endVertex)
         if(not self._isNegativeEdges_):
-            return s.dijkstraV2(self,startVertex,endVertex)
+            if(self.isCycleExist()):
+                return s.dijkstraV2(self,startVertex,endVertex)
+            else:
+                return s.topological_path(self,startVertex,endVertex)
         else:
             return s.bellman_ford(self,startVertex,endVertex)
 
@@ -426,6 +431,39 @@ def load(path,isUndirected = True):
 # #############################################################################
     
 class __ShortestPath__:
+    
+    def topological_path(self,graph,startVertex,endVertex):
+        path = graph.topologicalSort()
+        dist, parent = ht.HashTable(),ht.HashTable()
+        dist[startVertex] = 0
+        parent[startVertex] = None
+        startVertexFound = False
+        for vertex in path:
+            if(vertex == startVertex): startVertexFound = True
+            if(not startVertexFound):  continue
+            if(dist[vertex] == None): continue
+            for neig,weight in graph.__neighbourNode__(vertex):
+                if(dist[neig] == None or dist[neig] > dist[vertex] + weight):
+                    dist[neig] = dist[vertex] + weight
+                    parent[neig] = vertex
+        l=[]
+        startVertexFound = False
+        curr = endVertex
+        wt = 0
+        while(curr !=None):
+            l.append(curr)
+            end = curr
+            curr = parent[curr]
+            if(curr!=None): wt += graph.getValueOf((curr,end))
+            if(curr == startVertex):
+                startVertexFound = True
+                l.append(startVertex)
+                break
+        l.reverse()
+        if(startVertexFound):
+            return l,wt
+        else:
+            return None
     
     # 8-Feb-2019
     def __shortestPathWeighted__(self,graph,startVertex,parent,record,recursionTrace,rescueRepetition):
