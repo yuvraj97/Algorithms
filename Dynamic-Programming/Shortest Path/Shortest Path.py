@@ -28,6 +28,8 @@ def __DP_Shortest_Path__(g,startVertex,endVertex,parent,cost_memo):
     return min,boolean
 
 def DP_Shortest_Path(g,startVertex,endVertex):
+    if(g.isUndirectedGraph): raise ValueError("Graph must be Undirected")
+    if(not g._isWeighted_): raise ValueError("Graph must be weighted")
     if(startVertex==endVertex): return None
     parent = graph.ht.HashTable()
     cost_memo = graph.ht.HashTable()
