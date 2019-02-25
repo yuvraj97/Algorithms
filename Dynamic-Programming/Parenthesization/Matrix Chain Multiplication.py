@@ -9,9 +9,9 @@ import numpy as np
 from random import randrange
 # =============================================================================
     
-# cost of multipling metrix1 * metrix2
-# number of operation perform: m1_rows * m1_column * m2_column
-# here m1_column == m2_rows
+# cost of multiplying metrix1 * metrix2
+# Number of operation perform: m1_rows * m1_column * m2_column
+# Here m1_column == m2_rows
 def cost(metrix1, metrix2):
     m1_rows, m1_column = metrix1[0], metrix1[1]
     m2_rows, m2_column = metrix2[0], metrix2[1]
@@ -19,15 +19,15 @@ def cost(metrix1, metrix2):
 
 # =============================================================================
 
-# It will complute the optimal way to multiply metrices
-# sequence: it is the list of the dimensions of metrices
+# it will compute the optimal way to multiply matrices
+# Sequence: it is the list of the dimensions of matrices
 # Ex: sequence = [(4, 3), (3, 4), (4, 4), (4, 4), (4, 2)]
-# ==> 5 metrices with respective dimensions
-# record: records the cost of multipling metrices
-# parent: keep track a optimal path to multipling a range of matrix
+# ==> 5 matrices with respective dimensions
+# record: records the cost of multiplying matrices
+# parent: keep track a optimal path to multiplying a range of matrix
 def __DP__(sequence, record, parent, i, j):
     if((i,j) in record):    return record[(i,j)]
-    if(j - i == 1): # return cost and shape of multipling two metrices
+    if(j - i == 1): # return cost and shape of multiplying two matrices
         cst, shape = cost(sequence[i],sequence[j]), (sequence[i][0],sequence[j][1])
         record[(i,j)] = (cst,shape)
         parent[(i,j)] = (i,j)
@@ -63,7 +63,7 @@ def DP(sequence,metrices_sequence):
 
 # =============================================================================
     
-# It will multipy metrices according to DP()
+# It will multiply matrices according to DP()
 def __multiplyMetrices__(parent,metrices_sequence,curr):
     curr = parent[curr]
     if(type(curr[0]) == tuple): # There are 2 sequences, curr: ((Mi to Mk), (Mk to Mj))
@@ -86,7 +86,7 @@ def __multiplyMetrices__(parent,metrices_sequence,curr):
 
 # =============================================================================
 
-# This function is just to give a list of random metrices
+# This function is just to give a list of random matrices
 # Of a specified sequence
 def getSequenceOfMetrices(sequence):
     sizes = sequence
@@ -102,48 +102,48 @@ def getSequenceOfMetrices(sequence):
 
 # =============================================================================
 
-# It return tuples with random dimensions of matrices: [(row1,col1),(row2,col2),(row3,col3).....]
-# condition col1 == row2, col2 == row3, ......
-def randomSeqMetricsSizes(no_of_metrices = 5, size_range = 10):
+# It return tuples with random dimensions of matrices: [(row1, col1), (row2, col2), (row3, col3).....]
+# Condition col1 == row2, col2 == row3, ......
+def randomSeqMetricsSizes(no_of_metrices = 5, size_range_start = 10, size_range_end = 10):
     metrices_multiplication = []
-    a0 = randrange(1,size_range)
+    a0 = randrange(size_range_start,size_range_end)
     met1 = [a0,0]
     for i in range(no_of_metrices):
-        temp = randrange(1,size_range)
+        temp = randrange(size_range_start,size_range_end)
         met1[1] = temp
         metrices_multiplication.append(tuple(met1))
         met1[0] = temp
     return metrices_multiplication
 
 # =============================================================================
-    
+
+# It will linearly multiply the matrices
+def multiplyMetricesLinearly(metrix_list):
+    temp = metrix_list[0]
+    for i in range(1,len(metrix_list)):   temp = np.dot(temp, metrix_list[i])
+    return temp
+
 # Example
-no_of_metrices = 20
-sequence_of_sizes_of_metrices = randomSeqMetricsSizes(no_of_metrices)
+no_of_metrices = 50
+sequence_of_sizes_of_metrices = randomSeqMetricsSizes(no_of_metrices,100,600)
 metrices_sequence = getSequenceOfMetrices(sequence_of_sizes_of_metrices)
 m = DP(sequence_of_sizes_of_metrices,metrices_sequence)
 print("Multiplication of matrices:")
 print(m)
 
 ###############################################################################
-############# Function Given below are just for Testig purposes ###############
+############# Function Given below are just for Testing purposes ###############
 ###############################################################################
 
 '''
-# Given a list of metrices it returns the list of dimensions of the metrices respectively
+# Given a list of matrices it returns the list of dimensions of the metrices respectively
 def getShapesOfSequence(M):
     shapes = []
     for metrix in M:
         shapes.append(metrix.shape)
     return shapes
 
-# It will linearly mmultiply the metrices
-def multiplyMetricesLinearly(metrix_list):
-    temp = metrix_list[0]
-    for i in range(1,len(metrix_list)):   temp = np.dot(temp, metrix_list[i])
-    return temp
-
-# It will check if two metrices are equall or not
+# It will check if two matrices are equal or not
 def check(m1,m2):
     eq = m1 == m2
     for i in eq:
