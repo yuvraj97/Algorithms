@@ -7,6 +7,11 @@ Created on Tue Feb 26 01:43:42 2019
 
 import lib.Graph as graph
 
+# Given weight and values of n items, put them in a Knapsackz of fixed capacity and return:
+# 1. the items to put into Knapsack and
+# 2. maximum total value. We can get by putting those items into that Knapsack(with fix capacity)
+
+
 # It return a dictionary of items with random weights and prices
 def getRandomItems(capacity = 5, no_of_items = 3, max_price = 10):
     from random import randrange
