@@ -98,7 +98,7 @@ class Knapsack:
     def whichItems(self):
         if(self._isInitialized_ == False): raise ValueError('Knapsack is not Initialized')
         u, v = ("Source",0),("Destination",0)
-        shortestPath, weight = self._graph_.shortestPath(edge=(u,v))
+        shortestPath, weight = self._graph_.shortestPath(u,v)
         #print("SP:",shortestPath)
         l = []
         for i in range(len(shortestPath) -1):
@@ -126,7 +126,7 @@ print("Pick these items:",items_to_pick)
 print("Total value made:",value)
 '''
 
-'''
+
 capacity = 5
 items = getRandomItems(capacity, no_of_items=5)
 for k in items:
@@ -136,4 +136,3 @@ k.initialize(items,capacity)
 items_to_pick, value = k.whichItems()
 print("Pick these items:",items_to_pick)
 print("Total value made:",value)
-'''
